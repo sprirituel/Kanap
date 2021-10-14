@@ -1,4 +1,4 @@
-let produitDansLocalStorage = JSON.parse(localStorage.getItem("produit"));
+let produitDansLocalStorage = JSON.parse(localStorage.getItem("produits"));
 
 // Si le panier est vide
 
@@ -97,7 +97,7 @@ function createCart (produitDansLocalStorage) {
                 //IMG
                 let articleImg = document.createElement("img");
                 articleImg.classList.add("article-Img");
-                articleImg = new Image (300, 200);
+                articleImg = new Image (300, 150);
                 articleImg.src = divImg.appendChild(articleImg).imgContent = value.imageUrl;
 
                 //Nom du produit
@@ -150,15 +150,98 @@ if (produitDansLocalStorage != null) {
     }
 }
 
+ // bouton supprimer 
 
-
-// bouton supprimer 
-
-//const btnSupprimer = document.getElementById("deleteItem");
+const btnSupprimer = document.getElementsByClassName("deleteItem");
+var articlesLocalStorage = JSON.parse(localStorage.getItem("produits")); // <<< on recupère le localStorage
     
-//for (let j = 0; j < btnSupprimer.length; j++) {
-    //btnSupprimer[j].addEventListener("click" , (event) => {
-        //event.preventDefault();
+for (let j = 0; j < btnSupprimer.length; j++) {
+    btnSupprimer[j].addEventListener("click" , (event) => {
 
-    //})
-//}
+        var elementSupprimer = articlesLocalStorage.splice(j, 1);
+        localStorage.setItem("produits", JSON.stringify(articlesLocalStorage));
+        window.location.reload(true);
+    })
+}
+
+// ------------------ Récupération des données du formulaire---------------
+
+const btnFormulaire = document.getElementById("order");
+btnFormulaire.addEventListener("click", (event)=>{
+    event.preventDefault();
+
+    const contact = {
+        firstName : document.getElementById("firstName").value,
+        lastName : document.getElementById("lastName").value,
+        address : document.getElementById("address").value,
+        city : document.getElementById("city").value,
+        email : document.getElementById("email").value,
+    }
+    
+    //  ----------------- Validation du formulaire--------------------
+    // Le prénom
+    const lePrenom = contact.firstName;
+    if(/^([A-Za-z]{3,20})?([-]{0,1})?([A-Za-z]{3,20})$/.test(lePrenom)){
+
+    }else{
+        alert("Pour le prénom des lettres en minuscules ou majuscules compris entre 3 et 20 caractères")
+    }
+
+    // Le nom
+    const leNom = contact.lastName;
+    if(/^([A-Za-z]{3,20})?([-]{0,1})?([A-Za-z]{3,20})$/.test(leNom)){
+
+    }else{
+        alert("Pour le nom des lettres en minuscules ou majuscules compris entre 3 et 20 caractères")
+    }
+
+    // L'adresse
+    const ladresse = contact.address;
+    if(/^([A-Za-z0-9\s]{3,50})?([-]{0,1})?([A-Za-z0-9\s]{3,50})$/.test(ladresse)){
+
+    }else{
+        alert("Pour l'adresse des lettres et chiffre compris entre 3 et 50 caractères")
+    }
+
+    // La ville
+    const laVille = contact.city;
+    if(/^[A-Za-z\s]{3,30}$/.test(laVille)){
+
+    }else{
+        alert("Pour la ville des lettres en minuscules ou majuscules compris entre 3 et 30 caractères")
+
+    }
+
+     // Mettre l'objet formulaireValues dans le local storage
+
+     localStorage.setItem("formulaire", JSON.stringify(contact))
+
+     const envoyer = {
+         contact,
+         produitDansLocalStorage,
+     }
+
+     // Envoie des données vers le serveur
+
+     const promise = fetch("http://localhost:3000/api/products", {
+        method: "POST",
+        body: JSON.stringify(envoyer),
+        headers: { 
+        'Accept': 'application/json', 
+        'Content-Type': 'application/json' 
+        },
+        
+    });
+
+    promise.then(async(response)=>{
+        try{
+            const contenue = await response.json()
+        }
+        catch(e){
+            console.log(e)
+        }
+    })
+})
+
+
+
