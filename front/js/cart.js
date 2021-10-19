@@ -177,7 +177,9 @@ btnFormulaire.addEventListener("click", (event)=>{
         city : document.getElementById("city").value,
         email : document.getElementById("email").value,
     }
-    
+
+    //var contacts = new Object;
+    //contacts = {firstName, lastName, address, city, email}
     //  ----------------- Validation du formulaire--------------------
     // Le prénom
     const lePrenom = contact.firstName;
@@ -211,37 +213,33 @@ btnFormulaire.addEventListener("click", (event)=>{
         alert("Pour la ville des lettres en minuscules ou majuscules compris entre 3 et 30 caractères")
 
     }
-
      // Mettre l'objet formulaireValues dans le local storage
 
-     localStorage.setItem("formulaire", JSON.stringify(contact))
+    localStorage.setItem("formulaire", JSON.stringify(contact))
 
-     const envoyer = {
-         contact,
-         produitDansLocalStorage,
-     }
+    const envoyer = {
+        contact,
+        products: produitDansLocalStorage.map(e=>e.idProduit),
+    }
 
      // Envoie des données vers le serveur
 
-     const promise = fetch("http://localhost:3000/api/products", {
+    fetch("http://localhost:3000/api/products/order", {
         method: "POST",
-        body: JSON.stringify(envoyer),
-        headers: { 
-        'Accept': 'application/json', 
-        'Content-Type': 'application/json' 
+        headers: {
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
         },
-        
-    });
-
-    promise.then(async(response)=>{
-        try{
-            const contenue = await response.json()
-        }
-        catch(e){
-            console.log(e)
-        }
+        body: JSON.stringify(envoyer),
     })
+    .then(function(res) {
+        const contenu =  res.json()
+        console.log(contenu.orderId)
+        console.log(res)
+
+    })
+    .catch(function(error){
+        console.log(error)
+    })     
+
 })
-
-
-
