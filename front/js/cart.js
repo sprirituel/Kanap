@@ -178,14 +178,13 @@ btnFormulaire.addEventListener("click", (event)=>{
         email : document.getElementById("email").value,
     }
 
-    //var contacts = new Object;
-    //contacts = {firstName, lastName, address, city, email}
     //  ----------------- Validation du formulaire--------------------
     // Le prénom
     const lePrenom = contact.firstName;
     if(/^([A-Za-z]{3,20})?([-]{0,1})?([A-Za-z]{3,20})$/.test(lePrenom)){
 
     }else{
+        contact.firstName = 0
         alert("Pour le prénom des lettres en minuscules ou majuscules compris entre 3 et 20 caractères")
     }
 
@@ -194,6 +193,7 @@ btnFormulaire.addEventListener("click", (event)=>{
     if(/^([A-Za-z]{3,20})?([-]{0,1})?([A-Za-z]{3,20})$/.test(leNom)){
 
     }else{
+        contact.lastName = 0
         alert("Pour le nom des lettres en minuscules ou majuscules compris entre 3 et 20 caractères")
     }
 
@@ -202,6 +202,7 @@ btnFormulaire.addEventListener("click", (event)=>{
     if(/^([A-Za-z0-9\s]{3,50})?([-]{0,1})?([A-Za-z0-9\s]{3,50})$/.test(ladresse)){
 
     }else{
+        contact.address = 0
         alert("Pour l'adresse des lettres et chiffre compris entre 3 et 50 caractères")
     }
 
@@ -210,36 +211,50 @@ btnFormulaire.addEventListener("click", (event)=>{
     if(/^[A-Za-z\s]{3,30}$/.test(laVille)){
 
     }else{
+        contact.city = 0;
         alert("Pour la ville des lettres en minuscules ou majuscules compris entre 3 et 30 caractères")
 
     }
-     // Mettre l'objet formulaireValues dans le local storage
 
-    localStorage.setItem("formulaire", JSON.stringify(contact))
-
-    const envoyer = {
-        contact,
-        products: produitDansLocalStorage.map(e=>e.idProduit),
+    const mail = contact.email
+    if(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(mail)){
+    
+    }else{
+        contact.email = 0
+        alert("Merci de rentrer une adresse Email valide")
     }
 
-     // Envoie des données vers le serveur
+    if (contact.city != 0 && contact.firstName != 0 && contact.lastName != 0 && contact.address != 0 && contact.email != 0) {
+        // Mettre l'objet formulaireValues dans le local storage
+        localStorage.setItem("formulaire", JSON.stringify(contact))
 
-    fetch("http://localhost:3000/api/products/order", {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(envoyer),
-    })
-    .then(function(res) {
-        const contenu =  res.json()
-        console.log(contenu.orderId)
-        console.log(res)
 
-    })
-    .catch(function(error){
-        console.log(error)
-    })     
+        const envoyer = {
+            contact,
+            products: produitDansLocalStorage.map(e=>e.idProduit),
+        }
 
+    
+        // Envoie des données vers le serveur
+
+        fetch("http://localhost:3000/api/products/order", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json', 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(envoyer),
+        })
+        .then(function(res) {
+            return res.json()
+        })
+
+        .then(function(res){
+            localStorage.setItem("orderId", JSON.stringify(res.orderId))
+            window.location.replace(`confirmation.html`)
+        })
+        .catch(function(error){
+            console.log(error)
+        })     
+    }
 })
